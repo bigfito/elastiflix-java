@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<div th:fragment="card(movie, query, mode, page)"
+     class="bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-brand/30 hover:scale-105 transition-all duration-200 cursor-pointer group">
+    <a th:href="@{/movies/{id}(id=${movie.id}, backQuery=${query}, backMode=${mode}, backPage=${page})}">
+        <div class="relative aspect-[2/3] bg-gray-800">
+            <img th:if="${movie.posterPath != null}"
+                 th:src="${movie.posterPath}"
+                 th:alt="${movie.title}"
+                 class="w-full h-full object-cover"
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
+            <div th:if="${movie.posterPath == null}"
+                 class="w-full h-full flex items-center justify-center text-gray-600 text-4xl">
+                🎬
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+            <div th:if="${movie.voteAverage != null}"
+                 class="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs font-bold px-2 py-1 rounded">
+                ★ <span th:text="${#numbers.formatDecimal(movie.voteAverage, 1, 1)}">8.0</span>
+            </div>
+        </div>
+        <div class="p-3">
+            <h3 class="font-semibold text-sm text-white line-clamp-2 leading-snug"
+                th:text="${movie.title}">Movie Title</h3>
+            <div class="flex items-center justify-between mt-1">
+                <span class="text-gray-400 text-xs"
+                      th:text="${movie.releaseDate != null ? #strings.substring(movie.releaseDate, 0, 4) : ''}"></span>
+                <span th:if="${movie.genres != null and not #lists.isEmpty(movie.genres)}"
+                      class="text-gray-500 text-xs line-clamp-1"
+                      th:text="${movie.genres[0]}"></span>
+            </div>
+        </div>
+    </a>
+</div>
+</body>
+</html>

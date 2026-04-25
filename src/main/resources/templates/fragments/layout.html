@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle != null ? pageTitle + ' — Elastiflix' : 'Elastiflix'}">Elastiflix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { DEFAULT: '#E50914', dark: '#b20710' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+<nav class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center gap-6">
+    <a href="/" class="text-brand font-bold text-2xl tracking-tight">Elastiflix</a>
+    <span class="text-gray-500 text-sm hidden sm:block">Powered by Elasticsearch</span>
+</nav>
+
+<main class="flex-1">
+    <th:block th:replace="${content}"/>
+</main>
+
+<footer class="bg-gray-900 border-t border-gray-800 text-center text-gray-600 text-xs py-4">
+    Elastiflix &copy; 2025 &mdash; Elasticsearch-powered movie search
+</footer>
+
+</body>
+</html>

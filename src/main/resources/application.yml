@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: elastiflix-java
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+
+server:
+  port: 8080
+
+elasticsearch:
+  host: https://localhost:9200
+  api-key: b3FnNndaMEJlenVKUjNLS0hrazY6eWIyR0JfaWwxN0ZLTzBTMWs0RE1FZw==
+  index: elastiflix-movies
+  ssl-verify: false
+
+app:
+  page-size: 50
+  tmdb-image-base: https://image.tmdb.org/t/p/w500

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main-content})}" lang="en">
+<body>
+<th:block th:fragment="main-content">
+
+    <!-- Backdrop Hero -->
+    <div class="relative w-full h-64 sm:h-80 bg-gray-900 overflow-hidden">
+        <img th:if="${movie.backdropPath != null}"
+             th:src="${movie.backdropPath}"
+             th:alt="${movie.title}"
+             class="w-full h-full object-cover opacity-40"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent"></div>
+    </div>
+
+    <div class="max-w-screen-lg mx-auto px-6 pb-16 -mt-32 relative z-10">
+
+        <!-- Navigation buttons -->
+        <div class="flex items-center gap-3 mb-6">
+            <a th:if="${backQuery != null}"
+               th:href="@{/search(q=${backQuery}, mode=${backMode}, page=${backPage})}"
+               class="inline-flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition">
+                ← Back to Results
+            </a>
+            <a href="/"
+               class="inline-flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition">
+                ⌂ Back to Home
+            </a>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-8">
+
+            <!-- Poster -->
+            <div class="shrink-0 w-48 mx-auto sm:mx-0">
+                <img th:if="${movie.posterPath != null}"
+                     th:src="${movie.posterPath}"
+                     th:alt="${movie.title}"
+                     class="w-full rounded-xl shadow-2xl"/>
+                <div th:if="${movie.posterPath == null}"
+                     class="w-full aspect-[2/3] bg-gray-800 rounded-xl flex items-center justify-center text-5xl">
+                    🎬
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="flex-1 min-w-0">
+
+                <!-- Title & Year -->
+                <h1 class="text-3xl sm:text-4xl font-black text-white leading-tight"
+                    th:text="${movie.title}">Title</h1>
+                <p th:if="${movie.originalTitle != null and movie.originalTitle != movie.title}"
+                   class="text-gray-500 text-sm mt-1"
+                   th:text="${movie.originalTitle}"></p>
+                <p th:if="${movie.tagline != null and not #strings.isEmpty(movie.tagline)}"
+                   class="text-gray-400 italic mt-2 text-sm"
+                   th:text="${movie.tagline}"></p>
+
+                <!-- Meta row -->
+                <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-gray-400">
+                    <span th:if="${movie.releaseDate != null}"
+                          th:text="${#strings.substring(movie.releaseDate, 0, 4)}"></span>
+                    <span th:if="${movie.runtime != null and movie.runtime > 0}"
+                          th:text="${movie.runtime + ' min'}"></span>
+                    <span th:if="${movie.rating != null and not #strings.isEmpty(movie.rating)}"
+                          class="border border-gray-600 px-2 py-0.5 rounded text-xs"
+                          th:text="${movie.rating}"></span>
+                    <span th:if="${movie.voteAverage != null}"
+                          class="text-yellow-400 font-semibold">
+                        ★ <span th:text="${#numbers.formatDecimal(movie.voteAverage, 1, 1)}"></span>
+                        <span class="text-gray-600 font-normal"
+                              th:if="${movie.voteCount != null}"
+                              th:text="'(' + ${movie.voteCount} + ')'"></span>
+                    </span>
+                </div>
+
+                <!-- Genres -->
+                <div th:if="${movie.genres != null and not #lists.isEmpty(movie.genres)}"
+                     class="flex flex-wrap gap-2 mt-4">
+                    <span th:each="genre : ${movie.genres}"
+                          class="bg-gray-800 text-gray-300 text-xs px-3 py-1 rounded-full"
+                          th:text="${genre}"></span>
+                </div>
+
+                <!-- Overview -->
+                <div th:if="${movie.overview != null and not #strings.isEmpty(movie.overview)}"
+                     class="mt-5">
+                    <h2 class="text-white font-semibold mb-1">Overview</h2>
+                    <p class="text-gray-400 text-sm leading-relaxed" th:text="${movie.overview}"></p>
+                </div>
+
+                <!-- Plot (if different from overview) -->
+                <div th:if="${movie.plot != null and not #strings.isEmpty(movie.plot) and movie.plot != movie.overview}"
+                     class="mt-4">
+                    <h2 class="text-white font-semibold mb-1">Plot</h2>
+                    <p class="text-gray-400 text-sm leading-relaxed" th:text="${movie.plot}"></p>
+                </div>
+
+                <!-- Cast -->
+                <div th:if="${movie.cast != null and not #lists.isEmpty(movie.cast)}"
+                     class="mt-5">
+                    <h2 class="text-white font-semibold mb-1">Cast</h2>
+                    <p class="text-gray-400 text-sm"
+                       th:text="${#strings.listJoin(movie.cast, ', ')}"></p>
+                </div>
+
+                <!-- Additional Info Grid -->
+                <div class="grid grid-cols-2 gap-x-8 gap-y-2 mt-6 text-sm">
+                    <div th:if="${movie.status != null}">
+                        <span class="text-gray-600">Status</span>
+                        <span class="text-gray-300 ml-2" th:text="${movie.status}"></span>
+                    </div>
+                    <div th:if="${movie.originalLanguage != null}">
+                        <span class="text-gray-600">Language</span>
+                        <span class="text-gray-300 ml-2 uppercase" th:text="${movie.originalLanguage}"></span>
+                    </div>
+                    <div th:if="${movie.budget != null and movie.budget > 0}">
+                        <span class="text-gray-600">Budget</span>
+                        <span class="text-gray-300 ml-2"
+                              th:text="'$' + ${#numbers.formatInteger(movie.budget, 1, 'COMMA')}"></span>
+                    </div>
+                    <div th:if="${movie.revenue != null and movie.revenue > 0}">
+                        <span class="text-gray-600">Revenue</span>
+                        <span class="text-gray-300 ml-2"
+                              th:text="'$' + ${#numbers.formatInteger(movie.revenue, 1, 'COMMA')}"></span>
+                    </div>
+                    <div th:if="${movie.productionCompanies != null and not #lists.isEmpty(movie.productionCompanies)}">
+                        <span class="text-gray-600">Studio</span>
+                        <span class="text-gray-300 ml-2" th:text="${movie.productionCompanies[0]}"></span>
+                    </div>
+                </div>
+
+                <!-- Homepage -->
+                <div th:if="${movie.homepage != null and not #strings.isEmpty(movie.homepage)}"
+                     class="mt-5">
+                    <a th:href="${movie.homepage}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1 text-brand hover:underline text-sm">
+                        Official Website ↗
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>

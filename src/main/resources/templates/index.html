@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main-content})}" lang="en">
+<body>
+<th:block th:fragment="main-content">
+<div class="flex flex-col items-center justify-center min-h-[80vh] px-4">
+
+    <!-- Logo -->
+    <h1 class="text-brand font-black text-6xl tracking-tight mb-2">Elastiflix</h1>
+    <p class="text-gray-400 text-lg mb-12">Search millions of movies powered by Elasticsearch</p>
+
+    <!-- Search Form -->
+    <form action="/search" method="get" class="w-full max-w-2xl">
+        <div class="relative flex items-center mb-4">
+            <input
+                type="text"
+                name="q"
+                autofocus
+                placeholder="Search for a movie..."
+                class="w-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 rounded-xl px-5 py-4 pr-36 text-lg focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition"
+            />
+            <button type="submit"
+                    class="absolute right-2 bg-brand hover:bg-brand-dark text-white font-semibold px-6 py-2.5 rounded-lg transition">
+                Search
+            </button>
+        </div>
+
+        <!-- Search Mode Selector -->
+        <div class="flex flex-wrap gap-3 justify-center">
+            <label th:each="m : ${modes}"
+                   class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="mode"
+                       th:value="${m.name()}"
+                       th:checked="${m.name() == 'BM25'}"
+                       class="accent-brand"/>
+                <span class="text-sm text-gray-400 group-hover:text-white transition"
+                      th:text="${m.label()}"></span>
+            </label>
+        </div>
+    </form>
+</div>
+</th:block>
+</body>
+</html>

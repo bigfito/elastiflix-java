@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main-content})}" lang="en">
+<body>
+<th:block th:fragment="main-content">
+<div class="px-6 py-6 max-w-screen-xl mx-auto">
+
+    <!-- Search Bar -->
+    <form action="/search" method="get" class="flex flex-col sm:flex-row gap-3 mb-6">
+        <div class="relative flex-1 flex items-center">
+            <input type="text" name="q"
+                   th:value="${query}"
+                   placeholder="Search for a movie..."
+                   class="w-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 rounded-xl px-5 py-3 pr-28 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition"/>
+            <button type="submit"
+                    class="absolute right-2 bg-brand hover:bg-brand-dark text-white font-semibold px-5 py-2 rounded-lg transition text-sm">
+                Search
+            </button>
+        </div>
+        <!-- Mode pills -->
+        <div class="flex flex-wrap gap-2 items-center">
+            <th:block th:each="m : ${modes}">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="mode"
+                           th:value="${m.name()}"
+                           th:checked="${m.name() == currentMode}"
+                           class="accent-brand"/>
+                    <span class="text-xs text-gray-400 hover:text-white transition whitespace-nowrap"
+                          th:text="${m.label()}"></span>
+                </label>
+            </th:block>
+        </div>
+    </form>
+
+    <!-- Inference endpoint error -->
+    <div th:if="${searchError != null}"
+         class="flex items-start gap-4 bg-yellow-950 border border-yellow-700 text-yellow-300 rounded-xl px-6 py-5 mb-6">
+        <span class="text-2xl shrink-0">⚠️</span>
+        <div>
+            <p class="font-semibold mb-1">Inference endpoint not available</p>
+            <p class="text-sm text-yellow-400" th:text="${searchError}"></p>
+        </div>
+    </div>
+
+    <!-- No query state -->
+    <div th:if="${results == null and searchError == null}" class="text-center text-gray-500 py-24 text-lg">
+        Enter a search term above to find movies.
+    </div>
+
+    <!-- Results -->
+    <th:block th:if="${results != null}">
+
+        <!-- Result count -->
+        <p class="text-gray-400 text-sm mb-5">
+            Showing
+            <span class="text-white font-semibold" th:text="${results.fromIndex}"></span>–<span class="text-white font-semibold" th:text="${results.toIndex}"></span>
+            of
+            <span class="text-white font-semibold" th:text="${results.totalHits}"></span>
+            results for
+            <span class="text-brand font-semibold" th:text="'&quot;' + ${results.query} + '&quot;'"></span>
+            <span class="text-gray-600 ml-1" th:text="'(' + ${results.mode} + ')'"></span>
+        </p>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(results.movies)}"
+             class="text-center text-gray-500 py-24 text-lg">
+            No movies found for "<span th:text="${query}"></span>". Try a different query or search mode.
+        </div>
+
+        <!-- Movie Grid -->
+        <div th:if="${not #lists.isEmpty(results.movies)}"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+            <th:block th:each="movie : ${results.movies}">
+                <div th:replace="~{fragments/movie-card :: card(${movie}, ${query}, ${currentMode}, ${results.currentPage})}"></div>
+            </th:block>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${results.totalPages > 1}"
+             class="flex items-center justify-center gap-1 flex-wrap pb-8">
+
+            <!-- Previous -->
+            <a th:if="${results.hasPreviousPage()}"
+               th:href="@{/search(q=${query}, mode=${currentMode}, page=${results.currentPage - 1})}"
+               class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition">
+                &laquo;
+            </a>
+
+            <!-- Page numbers (show window of 7 around current) -->
+            <th:block th:with="start=${T(java.lang.Math).max(1, results.currentPage - 3)},
+                               end=${T(java.lang.Math).min(results.totalPages, results.currentPage + 3)}">
+                <a th:if="${start > 1}"
+                   th:href="@{/search(q=${query}, mode=${currentMode}, page=1)}"
+                   class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition">1</a>
+                <span th:if="${start > 2}" class="text-gray-600 px-1">…</span>
+
+                <th:block th:each="p : ${#numbers.sequence(start, end)}">
+                    <a th:href="@{/search(q=${query}, mode=${currentMode}, page=${p})}"
+                       th:text="${p}"
+                       th:classappend="${p == results.currentPage} ? 'bg-brand text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'"
+                       class="px-3 py-2 rounded-lg text-sm transition font-medium">1</a>
+                </th:block>
+
+                <span th:if="${end < results.totalPages - 1}" class="text-gray-600 px-1">…</span>
+                <a th:if="${end < results.totalPages}"
+                   th:href="@{/search(q=${query}, mode=${currentMode}, page=${results.totalPages})}"
+                   th:text="${results.totalPages}"
+                   class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition"></a>
+            </th:block>
+
+            <!-- Next -->
+            <a th:if="${results.hasNextPage()}"
+               th:href="@{/search(q=${query}, mode=${currentMode}, page=${results.currentPage + 1})}"
+               class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition">
+                &raquo;
+            </a>
+        </div>
+
+    </th:block>
+</div>
+</th:block>
+</body>
+</html>
