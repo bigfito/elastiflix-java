@@ -9,8 +9,8 @@ server:
   port: 8080
 
 elasticsearch:
-  host: https://localhost:9200
-  api-key: b3FnNndaMEJlenVKUjNLS0hrazY6eWIyR0JfaWwxN0ZLTzBTMWs0RE1FZw==
+  host: https://bigfito-serverless-search-a43f10.es.us-central1.gcp.elastic.cloud
+  api-key: TnNRdXhwMEI3X2dZMnRSdWVKV3g6dG5PaWVaZ1dJOExZS2IybXZwYnZwZw==
   index: elastiflix-movies
   ssl-verify: false
 

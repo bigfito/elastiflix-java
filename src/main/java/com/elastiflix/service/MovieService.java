@@ -21,15 +21,15 @@ public class MovieService {
         this.props = props;
     }
 
-    public SearchResponse search(String query, String mode, int page) throws IOException {
+    public SearchResponse search(String query, String mode, int page, int size, MovieRepository.SearchFilters filters, String sort) throws IOException {
         SearchMode searchMode = SearchMode.fromString(mode);
         int safePage = Math.max(1, page);
 
-        MovieRepository.SearchResult result = repository.search(query, searchMode, safePage);
+        MovieRepository.SearchResult result = repository.search(query, searchMode, safePage, size, filters, sort);
 
         enrichPosterPaths(result.movies());
 
-        return SearchResponse.of(result.movies(), result.totalHits(), safePage, props.pageSize, query, searchMode.name());
+        return SearchResponse.of(result.movies(), result.totalHits(), safePage, size, query, searchMode.name());
     }
 
     public Optional<Movie> findById(String id) throws IOException {

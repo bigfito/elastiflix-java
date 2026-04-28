@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import com.elastiflix.model.SearchMode;
 import com.elastiflix.model.SearchResponse;
 import com.elastiflix.service.MovieService;
+import com.elastiflix.repository.MovieRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 public class SearchController {
@@ -27,17 +29,30 @@ public class SearchController {
     @GetMapping("/search")
     public String search(
             @RequestParam(defaultValue = "") String q,
-            @RequestParam(defaultValue = "BM25") String mode,
+            @RequestParam(defaultValue = "TITLE") String mode,
             @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) List<String> genres,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String rating,
+            @RequestParam(defaultValue = "grid") String view,
+            @RequestParam(required = false) String sort,
             Model model
     ) throws IOException {
         model.addAttribute("modes", SearchMode.values());
         model.addAttribute("currentMode", mode.toUpperCase());
         model.addAttribute("query", q);
+        model.addAttribute("view", view);
+        model.addAttribute("sort", sort);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("selectedGenres", genres != null ? genres : List.of());
+        model.addAttribute("selectedYear", year);
+        model.addAttribute("selectedRating", rating);
 
         if (!q.isBlank()) {
             try {
-                SearchResponse results = movieService.search(q, mode, page);
+                MovieRepository.SearchFilters filters = new MovieRepository.SearchFilters(genres, year, rating);
+                SearchResponse results = movieService.search(q, mode, page, size, filters, sort);
                 model.addAttribute("results", results);
             } catch (ElasticsearchException e) {
                 log.warn("Elasticsearch error during search [mode={}]: status={} message={}",

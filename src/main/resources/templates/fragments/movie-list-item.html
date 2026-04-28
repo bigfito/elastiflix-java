@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<div th:fragment="item(movie, query, mode, page)"
+     class="bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-brand/30 transition-all duration-200 cursor-pointer group flex">
+    <a th:href="@{/movies/{id}(id=${movie.id}, backQuery=${query}, backMode=${mode}, backPage=${page})}" class="flex w-full">
+        <div class="relative w-32 shrink-0 bg-gray-800">
+            <img th:if="${movie.posterPath != null}"
+                 th:src="${movie.posterPath}"
+                 th:alt="${movie.title}"
+                 class="w-full h-full object-cover"
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
+            <div th:if="${movie.posterPath == null}"
+                 class="w-full h-full flex items-center justify-center text-gray-600 text-2xl">
+                🎬
+            </div>
+            <div th:if="${movie.voteAverage != null}"
+                 class="absolute top-1 right-1 bg-black/70 text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                ★ <span th:text="${#numbers.formatDecimal(movie.voteAverage, 1, 1)}">8.0</span>
+            </div>
+        </div>
+        <div class="p-4 flex flex-col justify-between flex-1">
+            <div>
+                <div class="flex items-start justify-between gap-4 mb-1">
+                    <h3 class="font-semibold text-lg text-white group-hover:text-brand transition"
+                        th:text="${movie.title}">Movie Title</h3>
+                    <span class="text-gray-400 text-sm whitespace-nowrap"
+                          th:text="${movie.releaseDate != null ? #strings.substring(movie.releaseDate, 0, 4) : ''}"></span>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <span th:each="genre : ${movie.genres}"
+                          class="text-[10px] uppercase tracking-wider font-bold bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full border border-gray-700"
+                          th:text="${genre}">Genre</span>
+                    <span th:if="${movie.rating != null}"
+                          class="text-[10px] uppercase tracking-wider font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full border border-brand/20"
+                          th:text="${movie.rating}">R</span>
+                </div>
+                <p class="text-gray-400 text-sm line-clamp-3 leading-relaxed mb-4"
+                   th:text="${movie.plot != null ? movie.plot : movie.overview}">Movie plot or overview goes here...</p>
+            </div>
+            <div th:if="${movie.cast != null and not #lists.isEmpty(movie.cast)}" class="flex items-center gap-2 overflow-hidden">
+                <span class="text-xs text-gray-500 shrink-0">Cast:</span>
+                <span class="text-xs text-gray-400 truncate"
+                      th:text="${#strings.listJoin(movie.cast.subList(0, T(java.lang.Math).min(movie.cast.size(), 5)), ', ')}"></span>
+            </div>
+        </div>
+    </a>
+</div>
+</body>
+</html>
