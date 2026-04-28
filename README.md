@@ -1,6 +1,6 @@
 # Elastiflix Java
 
-A movie search web application built with **Spring Boot** and **Elasticsearch**, demonstrating four distinct search strategies side-by-side: classic BM25 keyword search, sparse semantic search with ELSER, dense semantic search with E5, and a hybrid approach using Reciprocal Rank Fusion (RRF).
+A movie search web application built with **Spring Boot** and **Elasticsearch**, demonstrating five distinct search strategies side-by-side: standard title search, classic BM25 keyword search, sparse semantic search with ELSER, dense semantic search with E5, and a hybrid approach using Reciprocal Rank Fusion (RRF).
 
 ![Java](https://img.shields.io/badge/Java-21-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-green)
@@ -11,20 +11,23 @@ A movie search web application built with **Spring Boot** and **Elasticsearch**,
 
 ## Features
 
-- **Four search modes** selectable from the UI
+- **Five search modes** selectable from the UI
 
   | Mode | Strategy | Description |
   |------|----------|-------------|
+  | TITLE | Standard | `multi_match` on `title` and `original_title` (Default) |
   | BM25 | Keyword | `multi_match` across `title`, `original_title`, `overview`, `plot` with field boosting |
   | Semantic (ELSER) | Sparse vector | `semantic` query on the `plot_elser` field using the `.elser-model-2` |
   | Semantic (E5) | Dense vector | `semantic` query on the `plot_e5` field using `.multilingual-e5-small` |
   | Hybrid | BM25 + ELSER via RRF | `retriever.rrf` combining both standard retrievers (ES 8.14+) |
 
-- **Paginated results** — 50 results per page with a numbered page navigator
+- **Filtering & Sorting** — Filter by genre, release year, or rating. Sort results by RATING (High to Low) or YEAR (Newest first).
+- **Flexible Results View** — Toggle between **Grid** and **List** views in the search results page.
+- **Dynamic Pagination** — Choose between 25, 50, or 100 results per page.
 - **Movie detail page** — full metadata, poster image, and backdrop via TMDB
 - **REST API** — JSON endpoints at `/api/search` and `/api/movies/{id}`
 - **Graceful degradation** — inline warning when an inference endpoint is not deployed, no crash
-- **Dark-themed UI** built with Thymeleaf and Tailwind CSS (CDN)
+- **Modern Sidebar UI** — Clean layout with filters and search options on the left, results on the right. Built with Thymeleaf and Tailwind CSS.
 
 ---
 
