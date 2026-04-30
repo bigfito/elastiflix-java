@@ -2,9 +2,9 @@
 
 A movie search web application built with **Spring Boot** and **Elasticsearch**, demonstrating five distinct search strategies side-by-side: standard title search, classic BM25 keyword search, sparse semantic search with ELSER, dense semantic search with E5, and a hybrid approach using Reciprocal Rank Fusion (RRF).
 
-![Java](https://img.shields.io/badge/Java-21-blue)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-green)
-![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.17-yellow)
+![Java](https://img.shields.io/badge/Java-25-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-green)
+![Elasticsearch](https://img.shields.io/badge/Elasticsearch-9.x-yellow)
 ![License](https://img.shields.io/badge/license-Apache%202.0-lightgrey)
 
 ---
@@ -21,13 +21,14 @@ A movie search web application built with **Spring Boot** and **Elasticsearch**,
   | Semantic (E5) | Dense vector | `semantic` query on the `plot_e5` field using `.multilingual-e5-small` |
   | Hybrid | BM25 + ELSER via RRF | `retriever.rrf` combining both standard retrievers (ES 8.14+) |
 
-- **Filtering & Sorting** — Filter by genre, release year, or rating. Sort results by RATING (High to Low) or YEAR (Newest first).
+- **Faceted Filtering** — **Genre** and **Release Year** dropdowns are populated dynamically from the current search resultset via Elasticsearch aggregations (`terms` on `genres`, `date_histogram` on `release_date`). A `post_filter` keeps the available options stable as the user switches between values, so you can pivot between facets in a single click. **Rating** is a static dropdown (G/PG/PG-13/R/NC-17).
+- **Sorting** — Sort results by RATING (High to Low) or YEAR (Newest first).
 - **Flexible Results View** — Toggle between **Grid** and **List** views in the search results page.
 - **Dynamic Pagination** — Choose between 25, 50, or 100 results per page.
 - **Movie detail page** — full metadata, poster image, and backdrop via TMDB
 - **REST API** — JSON endpoints at `/api/search` and `/api/movies/{id}`
 - **Graceful degradation** — inline warning when an inference endpoint is not deployed, no crash
-- **Modern Sidebar UI** — Clean layout with filters and search options on the left, results on the right. Built with Thymeleaf and Tailwind CSS.
+- **Modern Sidebar UI** — Clean layout with filters and search options on the left, results on the right. Built with Thymeleaf and Tailwind CSS, with a tech-stack logo strip in the footer.
 
 ---
 
@@ -35,22 +36,22 @@ A movie search web application built with **Spring Boot** and **Elasticsearch**,
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Java 21 |
-| Framework | Spring Boot 3.4.1 |
+| Language | Java 25 |
+| Framework | Spring Boot 4.0.6 (Spring Framework 7) |
 | Template engine | Thymeleaf 3 |
 | CSS | Tailwind CSS (CDN) |
-| Search engine | Elasticsearch 8.17 |
-| ES Java client | `co.elastic.clients:elasticsearch-java:8.17.0` |
+| Search engine | Elasticsearch 9.x |
+| ES Java client | `co.elastic.clients:elasticsearch-java:9.1.0` |
 | Build | Maven (single module) |
 
 ---
 
 ## Prerequisites
 
-- Java 21+
-- Maven 3.8+
-- A running **Elasticsearch 8.17+** cluster
-- The `elastiflix-movies` index populated by [elastiflix-loader-java](../elastiflix-loader-java)
+- Java 25+
+- Maven 3.9.6+
+- A running **Elasticsearch 9.x** cluster
+- The `elastiflix-movies` index populated by [elastiflix-loader-java](../elastiflix-loader-java) — note that for the dynamic facets to work, `genres` must be a `keyword` (or have a `keyword` subfield) and `release_date` must be a `date` field
 
 ### Required inference endpoints
 
@@ -101,3 +102,25 @@ elasticsearch:
 app:
   page-size: 50
   tmdb-image-base: https://image.tmdb.org/t/p/w500
+```
+
+The `host` and `api-key` are typically supplied via the `ELASTIC_HOST` and `ELASTIC_APIKEY` environment variables (the defaults in `application.yml` reference them as `${ELASTIC_HOST}` / `${ELASTIC_APIKEY}`).
+
+---
+
+## Build & Run
+
+```bash
+# Compile and package
+mvn clean package
+
+# Run locally (binds :8080)
+ELASTIC_HOST=https://localhost:9200 \
+ELASTIC_APIKEY=<base64-api-key> \
+mvn spring-boot:run
+
+# Or run the packaged jar
+java -jar target/elastiflix-java-0.0.1-SNAPSHOT.jar
+```
+
+Open `http://localhost:8080` to land on the home page, or jump straight to `/search?q=matrix`.

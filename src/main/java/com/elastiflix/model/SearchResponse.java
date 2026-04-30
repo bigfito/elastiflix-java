@@ -14,8 +14,10 @@ public class SearchResponse {
     private int totalPages;
     private String query;
     private String mode;
+    private List<String> availableGenres;
+    private List<Integer> availableYears;
 
-    public static SearchResponse of(List<Movie> movies, long totalHits, int currentPage, int pageSize, String query, String mode) {
+    public static SearchResponse of(List<Movie> movies, long totalHits, int currentPage, int pageSize, String query, String mode, List<String> availableGenres, List<Integer> availableYears) {
         SearchResponse r = new SearchResponse();
         r.movies = movies;
         r.totalHits = totalHits;
@@ -24,6 +26,8 @@ public class SearchResponse {
         r.totalPages = (int) Math.ceil((double) totalHits / pageSize);
         r.query = query;
         r.mode = mode;
+        r.availableGenres = availableGenres;
+        r.availableYears = availableYears;
         return r;
     }
 

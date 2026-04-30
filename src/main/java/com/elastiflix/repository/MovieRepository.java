@@ -1,6 +1,14 @@
 package com.elastiflix.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.CalendarInterval;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.elastiflix.config.AppProperties;
@@ -10,11 +18,19 @@ import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class MovieRepository {
+
+    private static final String GENRES_AGG = "genres";
+    private static final String YEARS_AGG = "years";
 
     private final ElasticsearchClient esClient;
     private final AppProperties props;
@@ -37,95 +53,111 @@ public class MovieRepository {
     }
 
     private SearchResult searchTitle(String queryText, int from, int size, SearchFilters filters, String sort) throws IOException {
-        SearchResponse<Movie> response = esClient.search(s -> s
-                        .index(props.esIndex)
-                        .from(from)
-                        .size(size)
-                        .query(q -> q
-                                .bool(b -> b
-                                        .must(m -> m
-                                                .multiMatch(mm -> mm
-                                                        .query(queryText)
-                                                        .fields(List.of("title", "original_title"))
-                                                )
-                                        )
-                                        .filter(buildFilters(filters))
-                                )
-                        )
-                        .sort(buildSort(sort)),
-                Movie.class
-        );
+        SearchResponse<Movie> response = esClient.search(s -> {
+            s.index(props.esIndex)
+                    .from(from)
+                    .size(size)
+                    .query(q -> q
+                            .bool(b -> b
+                                    .must(m -> m
+                                            .multiMatch(mm -> mm
+                                                    .query(queryText)
+                                                    .fields(List.of("title", "original_title"))
+                                            )
+                                    )
+                                    .filter(buildNonGenreFilters(filters))
+                            )
+                    )
+                    .aggregations(GENRES_AGG, genresAggregation())
+                    .aggregations(YEARS_AGG, yearsAggregation())
+                    .sort(buildSort(sort));
+            Query postFilter = buildPostFilter(filters);
+            if (postFilter != null) {
+                s.postFilter(postFilter);
+            }
+            return s;
+        }, Movie.class);
         return toSearchResult(response);
     }
 
     private SearchResult searchBm25(String queryText, int from, int size, SearchFilters filters, String sort) throws IOException {
-        SearchResponse<Movie> response = esClient.search(s -> s
-                .index(props.esIndex)
-                .from(from)
-                .size(size)
-                .query(q -> q
-                        .bool(b -> b
-                                .must(m -> m
-                                        .multiMatch(mm -> mm
-                                                .query(queryText)
-                                                .fields(List.of("title^3", "original_title^2", "overview", "plot"))
-                                        )
-                                )
-                                .filter(buildFilters(filters))
-                        )
-                )
-                .sort(buildSort(sort)),
-                Movie.class
-        );
+        SearchResponse<Movie> response = esClient.search(s -> {
+            s.index(props.esIndex)
+                    .from(from)
+                    .size(size)
+                    .query(q -> q
+                            .bool(b -> b
+                                    .must(m -> m
+                                            .multiMatch(mm -> mm
+                                                    .query(queryText)
+                                                    .fields(List.of("title^3", "original_title^2", "overview", "plot"))
+                                            )
+                                    )
+                                    .filter(buildNonGenreFilters(filters))
+                            )
+                    )
+                    .aggregations(GENRES_AGG, genresAggregation())
+                    .aggregations(YEARS_AGG, yearsAggregation())
+                    .sort(buildSort(sort));
+            Query postFilter = buildPostFilter(filters);
+            if (postFilter != null) {
+                s.postFilter(postFilter);
+            }
+            return s;
+        }, Movie.class);
         return toSearchResult(response);
     }
 
     private SearchResult searchSemantic(String queryText, String field, int from, int size, SearchFilters filters, String sort) throws IOException {
         String escaped = queryText.replace("\\", "\\\\").replace("\"", "\\\"");
 
-        // Semantic query is part of the query object.
-        // If we have filters, we need a bool query with must: semantic and filter: buildFilters
-        SearchResponse<Movie> response = esClient.search(s -> s
-                .index(props.esIndex)
-                .from(from)
-                .size(size)
-                .query(q -> q
-                        .bool(b -> b
-                                .must(must -> must
-                                        .withJson(new StringReader("""
-                                                {
-                                                  "semantic": {
-                                                    "field": "%s",
-                                                    "query": "%s"
-                                                  }
-                                                }
-                                                """.formatted(field, escaped)))
-                                )
-                                .filter(buildFilters(filters))
-                        )
-                )
-                .sort(buildSort(sort)),
-                Movie.class
-        );
+        SearchResponse<Movie> response = esClient.search(s -> {
+            s.index(props.esIndex)
+                    .from(from)
+                    .size(size)
+                    .query(q -> q
+                            .bool(b -> b
+                                    .must(must -> must
+                                            .withJson(new StringReader("""
+                                                    {
+                                                      "semantic": {
+                                                        "field": "%s",
+                                                        "query": "%s"
+                                                      }
+                                                    }
+                                                    """.formatted(field, escaped)))
+                                    )
+                                    .filter(buildNonGenreFilters(filters))
+                            )
+                    )
+                    .aggregations(GENRES_AGG, genresAggregation())
+                    .aggregations(YEARS_AGG, yearsAggregation())
+                    .sort(buildSort(sort));
+            Query postFilter = buildPostFilter(filters);
+            if (postFilter != null) {
+                s.postFilter(postFilter);
+            }
+            return s;
+        }, Movie.class);
         return toSearchResult(response);
     }
 
     private SearchResult searchHybrid(String queryText, int from, int size, SearchFilters filters, String sort) throws IOException {
-        // Hybrid BM25 + ELSER using the retriever/rrf API (ES 8.14+)
+        // RRF retrievers don't support sort — fall back to BM25 when sorting requested.
+        if (sort != null && !sort.isBlank()) {
+            return searchBm25(queryText, from, size, filters, sort);
+        }
+
         String escaped = queryText.replace("\\", "\\\\").replace("\"", "\\\"");
-
-        // If filters are present, we need to apply them to both retrievers
-        List<co.elastic.clients.elasticsearch._types.query_dsl.Query> esFilters = buildFilters(filters);
-
-        // Re-evaluating searchHybrid to include filters.
-        // It's probably easier to build the full JSON if we have filters.
-
-        // RRF doesn't support 'sort' parameter at the top level in the same way standard search does
-        // because it combines results from multiple retrievers using RRF algorithm.
-        // If 'sort' is requested, we might have to fallback or handle it differently.
-        // However, if the user explicitly wants to sort by Year, Title or Rating,
-        // they might care less about the hybrid relevance score.
-        // But the task says "allow to sort results".
+        String nonGenreFilterJson = buildNonGenreFilterJson(filters);
+        String postFilterJson = buildPostFilterJson(filters);
+        String aggsJson = """
+                ,
+                "aggs": {
+                  "%s": { "terms": { "field": "genres", "size": 100 } },
+                  "%s": { "date_histogram": { "field": "release_date", "calendar_interval": "year", "min_doc_count": 1 } }
+                }
+                """.formatted(GENRES_AGG, YEARS_AGG);
 
         String body = """
                 {
@@ -158,29 +190,18 @@ public class MovieRepository {
                       "rank_window_size": 100,
                       "rank_constant": 60
                     }
-                  }
+                  }%s%s
                 }
                 """.formatted(
                         from,
                         size,
                         escaped,
-                        buildFilterJson(filters),
+                        nonGenreFilterJson,
                         escaped,
-                        buildFilterJson(filters)
+                        nonGenreFilterJson,
+                        postFilterJson,
+                        aggsJson
                 );
-
-        // NOTE: RRF with explicit 'sort' is not standardly combined.
-        // Usually you either use RRF for relevance OR you use sort for attribute sorting.
-        // If sort is specified, we will use standard search for Hybrid? No, let's just stick to standard search if sort is present for Hybrid mode too?
-        // Actually, let's check if the client allows sort with retriever.
-        // The ES documentation says that 'sort' is not supported when using 'retriever'.
-
-        if (sort != null && !sort.isBlank()) {
-            // If sort is requested, we use a bool query with both BM25 and Semantic (as must/should)
-            // or just BM25 to keep it simple when sorting by attribute.
-            // Let's use BM25 with filters if sort is present, to avoid RRF limitations.
-            return searchBm25(queryText, from, size, filters, sort);
-        }
 
         SearchResponse<Movie> response = esClient.search(
                 s -> s.index(props.esIndex).withJson(new StringReader(body)),
@@ -189,65 +210,46 @@ public class MovieRepository {
         return toSearchResult(response);
     }
 
-    private String buildFilterJson(SearchFilters filters) {
-        if (filters == null) return "";
-        StringBuilder sb = new StringBuilder();
-        List<String> conditions = new java.util.ArrayList<>();
-
-        if (filters.genres() != null && !filters.genres().isEmpty()) {
-            String genres = filters.genres().stream().map(g -> "\"" + g + "\"").collect(java.util.stream.Collectors.joining(","));
-            conditions.add("{\"terms\": {\"genres\": [" + genres + "]}}");
-        }
-        if (filters.rating() != null && !filters.rating().isBlank()) {
-            conditions.add("{\"term\": {\"rating\": \"" + filters.rating() + "\"}}");
-        }
-        if (filters.year() != null) {
-            conditions.add("{\"range\": {\"release_date\": {\"gte\": \"" + filters.year() + "-01-01\", \"lte\": \"" + filters.year() + "-12-31\"}}}");
-        }
-
-        if (conditions.isEmpty()) return "";
-
-        return ", \"filter\": [" + String.join(",", conditions) + "]";
+    private Aggregation genresAggregation() {
+        return Aggregation.of(a -> a.terms(t -> t.field("genres").size(100)));
     }
 
-    private List<co.elastic.clients.elasticsearch._types.SortOptions> buildSort(String sort) {
-        if (sort == null || sort.isBlank()) {
-            return List.of();
-        }
-
-        return switch (sort.toUpperCase()) {
-            case "RATING" -> List.of(co.elastic.clients.elasticsearch._types.SortOptions.of(s -> s
-                    .field(f -> f.field("vote_average").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc))));
-            case "YEAR" -> List.of(co.elastic.clients.elasticsearch._types.SortOptions.of(s -> s
-                    .field(f -> f.field("release_date").order(co.elastic.clients.elasticsearch._types.SortOrder.Desc))));
-            default -> List.of();
-        };
+    private Aggregation yearsAggregation() {
+        return Aggregation.of(a -> a.dateHistogram(dh -> dh
+                .field("release_date")
+                .calendarInterval(CalendarInterval.Year)
+                .minDocCount(1)
+        ));
     }
 
-    private List<co.elastic.clients.elasticsearch._types.query_dsl.Query> buildFilters(SearchFilters filters) {
-        List<co.elastic.clients.elasticsearch._types.query_dsl.Query> esFilters = new java.util.ArrayList<>();
+    private List<Query> buildNonGenreFilters(SearchFilters filters) {
+        List<Query> esFilters = new ArrayList<>();
         if (filters == null) return esFilters;
 
-        if (filters.genres() != null && !filters.genres().isEmpty()) {
-            esFilters.add(co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q
-                    .terms(t -> t
-                            .field("genres")
-                            .terms(v -> v.value(filters.genres().stream().map(co.elastic.clients.elasticsearch._types.FieldValue::of).toList()))
-                    )
+        if (filters.rating() != null && !filters.rating().isBlank()) {
+            esFilters.add(Query.of(q -> q
+                    .term(t -> t.field("rating").value(filters.rating()))
             ));
         }
 
-        if (filters.rating() != null && !filters.rating().isBlank()) {
-            esFilters.add(co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q
-                    .term(t -> t
-                            .field("rating")
-                            .value(filters.rating())
+        return esFilters;
+    }
+
+    private Query buildPostFilter(SearchFilters filters) {
+        if (filters == null) return null;
+        List<Query> clauses = new ArrayList<>();
+
+        if (filters.genres() != null && !filters.genres().isEmpty()) {
+            clauses.add(Query.of(q -> q
+                    .terms(t -> t
+                            .field("genres")
+                            .terms(v -> v.value(filters.genres().stream().map(FieldValue::of).toList()))
                     )
             ));
         }
 
         if (filters.year() != null) {
-            esFilters.add(co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q
+            clauses.add(Query.of(q -> q
                     .range(r -> r
                             .date(d -> d
                                     .field("release_date")
@@ -258,13 +260,60 @@ public class MovieRepository {
             ));
         }
 
-        return esFilters;
+        if (clauses.isEmpty()) return null;
+        if (clauses.size() == 1) return clauses.get(0);
+        return Query.of(q -> q.bool(BoolQuery.of(b -> b.filter(clauses))));
+    }
+
+    private String buildNonGenreFilterJson(SearchFilters filters) {
+        if (filters == null) return "";
+        List<String> conditions = new ArrayList<>();
+
+        if (filters.rating() != null && !filters.rating().isBlank()) {
+            conditions.add("{\"term\": {\"rating\": \"" + filters.rating() + "\"}}");
+        }
+
+        if (conditions.isEmpty()) return "";
+        return ", \"filter\": [" + String.join(",", conditions) + "]";
+    }
+
+    private String buildPostFilterJson(SearchFilters filters) {
+        if (filters == null) return "";
+        List<String> clauses = new ArrayList<>();
+
+        if (filters.genres() != null && !filters.genres().isEmpty()) {
+            String genres = filters.genres().stream()
+                    .map(g -> "\"" + g.replace("\"", "\\\"") + "\"")
+                    .collect(Collectors.joining(","));
+            clauses.add("{\"terms\": {\"genres\": [" + genres + "]}}");
+        }
+
+        if (filters.year() != null) {
+            clauses.add("{\"range\": {\"release_date\": {\"gte\": \"" + filters.year() + "-01-01\", \"lte\": \"" + filters.year() + "-12-31\"}}}");
+        }
+
+        if (clauses.isEmpty()) return "";
+        if (clauses.size() == 1) return ",\n  \"post_filter\": " + clauses.get(0);
+        return ",\n  \"post_filter\": { \"bool\": { \"filter\": [" + String.join(",", clauses) + "] } }";
+    }
+
+    private List<SortOptions> buildSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return List.of();
+        }
+
+        return switch (sort.toUpperCase()) {
+            case "RATING" -> List.of(SortOptions.of(s -> s
+                    .field(f -> f.field("vote_average").order(SortOrder.Desc))));
+            case "YEAR" -> List.of(SortOptions.of(s -> s
+                    .field(f -> f.field("release_date").order(SortOrder.Desc))));
+            default -> List.of();
+        };
     }
 
     public record SearchFilters(List<String> genres, Integer year, String rating) {}
 
     public Optional<Movie> findById(String id) throws IOException {
-        // Use term query on the keyword 'id' field since _id may differ
         SearchResponse<Movie> response = esClient.search(s -> s
                 .index(props.esIndex)
                 .size(1)
@@ -289,8 +338,28 @@ public class MovieRepository {
         long total = response.hits().total() != null
                 ? response.hits().total().value()
                 : 0L;
-        return new SearchResult(movies, total);
+
+        List<String> availableGenres = List.of();
+        if (response.aggregations() != null && response.aggregations().get(GENRES_AGG) != null) {
+            availableGenres = response.aggregations().get(GENRES_AGG).sterms().buckets().array().stream()
+                    .map(StringTermsBucket::key)
+                    .map(FieldValue::stringValue)
+                    .sorted(Comparator.naturalOrder())
+                    .toList();
+        }
+
+        List<Integer> availableYears = List.of();
+        if (response.aggregations() != null && response.aggregations().get(YEARS_AGG) != null) {
+            availableYears = response.aggregations().get(YEARS_AGG).dateHistogram().buckets().array().stream()
+                    .map(b -> Instant.ofEpochMilli(b.key()).atZone(ZoneOffset.UTC).getYear())
+                    .distinct()
+                    .sorted(Comparator.reverseOrder())
+                    .toList();
+        }
+
+        return new SearchResult(movies, total, availableGenres, availableYears);
     }
 
-    public record SearchResult(List<Movie> movies, long totalHits) {}
+    public record SearchResult(List<Movie> movies, long totalHits,
+                               List<String> availableGenres, List<Integer> availableYears) {}
 }

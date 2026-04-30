@@ -74,9 +74,16 @@
                         <!-- Year -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Release Year</label>
-                            <input type="number" name="year" th:value="${selectedYear}" placeholder="e.g. 2024"
-                                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition"
-                                   onkeypress="if(event.key === 'Enter'){this.form.submit()}"/>
+                            <select name="year"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition disabled:opacity-50"
+                                    onchange="this.form.submit()"
+                                    th:disabled="${#lists.isEmpty(availableYears)}">
+                                <option value="">All Years</option>
+                                <option th:each="y : ${availableYears}"
+                                        th:value="${y}"
+                                        th:text="${y}"
+                                        th:selected="${selectedYear != null and selectedYear == y}"></option>
+                            </select>
                         </div>
 
                         <!-- Rating -->
@@ -95,9 +102,16 @@
                         <!-- Genres -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Genre</label>
-                            <input type="text" name="genres" th:value="${selectedGenres != null and not #lists.isEmpty(selectedGenres) ? selectedGenres[0] : ''}" placeholder="e.g. Action"
-                                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition"
-                                   onkeypress="if(event.key === 'Enter'){this.form.submit()}"/>
+                            <select name="genres"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition disabled:opacity-50"
+                                    onchange="this.form.submit()"
+                                    th:disabled="${#lists.isEmpty(availableGenres)}">
+                                <option value="">All Genres</option>
+                                <option th:each="g : ${availableGenres}"
+                                        th:value="${g}"
+                                        th:text="${g}"
+                                        th:selected="${selectedGenres != null and not #lists.isEmpty(selectedGenres) and selectedGenres[0] == g}"></option>
+                            </select>
                         </div>
                     </div>
                 </div>

@@ -48,12 +48,18 @@ public class SearchController {
         model.addAttribute("selectedGenres", genres != null ? genres : List.of());
         model.addAttribute("selectedYear", year);
         model.addAttribute("selectedRating", rating);
+        model.addAttribute("availableGenres", List.of());
+        model.addAttribute("availableYears", List.of());
 
         if (!q.isBlank()) {
             try {
                 MovieRepository.SearchFilters filters = new MovieRepository.SearchFilters(genres, year, rating);
                 SearchResponse results = movieService.search(q, mode, page, size, filters, sort);
                 model.addAttribute("results", results);
+                model.addAttribute("availableGenres",
+                        results.getAvailableGenres() != null ? results.getAvailableGenres() : List.of());
+                model.addAttribute("availableYears",
+                        results.getAvailableYears() != null ? results.getAvailableYears() : List.of());
             } catch (ElasticsearchException e) {
                 log.warn("Elasticsearch error during search [mode={}]: status={} message={}",
                         mode, e.status(), e.getMessage());

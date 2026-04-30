@@ -9,8 +9,8 @@ server:
   port: 8080
 
 elasticsearch:
-  host: <YOUR_HOST_INFO_HERE>
-  api-key: <YOUR_API_KEY_HERE>
+  host: ${ELASTIC_HOST}
+  api-key: ${ELASTIC_APIKEY}
   index: elastiflix-movies
   ssl-verify: false
 

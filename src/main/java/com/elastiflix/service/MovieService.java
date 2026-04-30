@@ -29,7 +29,7 @@ public class MovieService {
 
         enrichPosterPaths(result.movies());
 
-        return SearchResponse.of(result.movies(), result.totalHits(), safePage, size, query, searchMode.name());
+        return SearchResponse.of(result.movies(), result.totalHits(), safePage, size, query, searchMode.name(), result.availableGenres(), result.availableYears());
     }
 
     public Optional<Movie> findById(String id) throws IOException {

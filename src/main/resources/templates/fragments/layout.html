@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${pageTitle != null ? pageTitle + ' — Elastiflix' : 'Elastiflix'}">Elastiflix</title>
+    <title th:text="${pageTitle != null ? pageTitle + ' — Elastiflix Java' : 'Elastiflix Java'}">Elastiflix Java</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,7 +24,7 @@
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
 
 <nav class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center gap-6">
-    <a href="/" class="text-brand font-bold text-2xl tracking-tight">Elastiflix</a>
+    <a href="/" class="text-brand font-bold text-2xl tracking-tight">Elastiflix Java</a>
     <span class="text-gray-500 text-sm hidden sm:block">Powered by Elasticsearch</span>
 </nav>
 
@@ -33,7 +33,15 @@
 </main>
 
 <footer class="bg-gray-900 border-t border-gray-800 text-center text-gray-600 text-xs py-4">
-    Elastiflix &copy; 2025 &mdash; Elasticsearch-powered movie search
+    <div>Elastiflix Java &copy; 2025 &mdash; Elasticsearch-powered movie search</div>
+    <div class="mt-3 flex items-center justify-center gap-5 opacity-70">
+        <img src="https://cdn.simpleicons.org/openjdk/9ca3af" alt="Java" title="Java 25" class="h-5 w-5"/>
+        <img src="https://cdn.simpleicons.org/spring/9ca3af" alt="Spring Boot" title="Spring Boot 4.0.6" class="h-5 w-5"/>
+        <img src="https://cdn.simpleicons.org/elasticsearch/9ca3af" alt="Elasticsearch" title="Elasticsearch" class="h-5 w-5"/>
+        <img src="https://cdn.simpleicons.org/thymeleaf/9ca3af" alt="Thymeleaf" title="Thymeleaf" class="h-5 w-5"/>
+        <img src="https://cdn.simpleicons.org/tailwindcss/9ca3af" alt="Tailwind CSS" title="Tailwind CSS" class="h-5 w-5"/>
+        <img src="https://cdn.simpleicons.org/apachemaven/9ca3af" alt="Maven" title="Maven" class="h-5 w-5"/>
+    </div>
 </footer>
 
 </body>
