@@ -296,7 +296,7 @@ stable `errorCode` — never an HTML error page.
 ## Testing
 
 ```bash
-./mvnw test      # 272 unit tests + JaCoCo coverage gate
+./mvnw test      # 273 unit tests + JaCoCo coverage gate
 ./mvnw verify    # also runs MovieRepositoryIT against a real Elasticsearch (needs Docker)
 
 # Fail instead of skipping when Docker is missing (use in CI)
@@ -311,12 +311,12 @@ The suite is self-contained: `src/test/resources/application.properties` supplie
 
 - **Unit tests** mock the Elasticsearch client and assert the shape of every request the repository builds —
   field boosts, filter clauses, sort, pagination offsets and the RRF retriever's `rank_window_size`.
-- **`MovieRepositoryIT`** (16 tests) starts Elasticsearch 8.17 in a container and runs TITLE, BM25, all three
+- **`MovieRepositoryIT`** (16 tests) starts Elasticsearch 9.5 in a container and runs TITLE, BM25, all three
   filters, both sorts, pagination and `findById` against it, proving a real cluster accepts those queries. It
   **skips itself when Docker is unavailable** — and names the reason, since a silently skipped integration test
   looks exactly like a passing one. Pass `-Delastiflix.it.requireDocker=true` to make that a failure instead.
   Semantic and Hybrid modes are out of scope there, since they need deployed ML endpoints.
-- **Coverage** is enforced by JaCoCo at **90% instruction / 85% branch** (currently 98.5% / 92.7%), bound to the
+- **Coverage** is enforced by JaCoCo at **90% instruction / 85% branch** (currently 98.6% / 92.4%), bound to the
   `test` phase so a plain `mvn test` fails on a regression instead of deferring it to `verify`. `lombok.config`
   marks generated accessors so they neither count toward nor dilute the figure. Only `ElastiflixApplication` is
   excluded. Report: `target/site/jacoco/index.html`.

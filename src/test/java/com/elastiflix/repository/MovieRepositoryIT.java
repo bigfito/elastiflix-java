@@ -304,7 +304,7 @@ class MovieRepositoryIT {
     @Test
     void elserJinaProducesAQueryStructureTheClusterAccepts() {
         // The reranked mode cannot run end to end here: it needs both ELSER and a rerank
-        // endpoint. What we can prove is that 8.17 understands the retriever we build — so
+        // endpoint. What we can prove is that a real cluster understands the retriever we build — so
         // assert the cluster complains about the *missing endpoint*, not about the syntax.
         // A parsing_exception here would mean the generated DSL is malformed.
         assertThatThrownBy(() -> repository.search("a caped vigilante", SearchMode.ELSER_JINA, 1, 10, noFilters(), null))

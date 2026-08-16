@@ -66,7 +66,7 @@ All query builders live in `MovieRepository`. `HYBRID` and `ELSER_JINA` fall bac
 
 - **`ElasticsearchConfig`** — builds the `ElasticsearchClient` bean from `ElasticsearchProperties`
 - **`ElasticsearchProperties` / `RerankProperties` / `AppProperties`** — immutable, validated `@ConfigurationProperties` records binding `elasticsearch.*`, `elasticsearch.rerank.*` and `app.*` from `application.yml`; missing required values fail fast at startup
-- **`MovieRepository`** — all query strategies (`searchTitle`, `searchBm25`, `searchSemantic`, `searchHybrid`, `searchElserJina`, `findById`); accepts a `SearchFilters` record (genres, year range) and handles pagination
+- **`MovieRepository`** — all query strategies (`searchTitle`, `searchBm25`, `searchSemantic`, `searchHybrid`, `searchElserJina`, `findById`); accepts a `SearchFilters` record (genres, year, rating) and handles pagination
 - **`MovieService`** — orchestration layer; prepends TMDB CDN base URL to poster/backdrop paths and classifies Elasticsearch failures into the `ElastiflixException` hierarchy via `ElasticsearchErrors`
 - **`SearchController` / `MovieSearchParams`** — bind and validate search parameters (query, mode, page, size, genre/year filters, sort, view)
 - **`MovieGenre` / `ReleaseYear`** — closed enum sets backing the genre and release-year filters; incoming values are canonicalised before reaching the terms query

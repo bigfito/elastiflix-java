@@ -235,8 +235,9 @@ public class MovieRepository {
      * bounded anyway: the model is listwise, scoring the query and every candidate in one
      * shared context. The service layer clamps the page to match, and the view says so.
      *
-     * <p>Filters are attached to the inner retriever because the 8.17 Java client does not
-     * expose the reranker's own {@code filter} (or {@code min_score}) parameter.
+     * <p>Filters are attached to the inner retriever so they narrow the candidate set
+     * before it enters the rerank window — a filter on the reranker itself would spend
+     * window slots on documents that get discarded afterwards.
      */
     private SearchResult searchElserJina(String queryText, int from, int size, SearchFilters filters, String sort) throws IOException {
         if (degradesToBm25(SearchMode.ELSER_JINA, sort)) {

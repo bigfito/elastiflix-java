@@ -238,8 +238,8 @@ class MovieRepositoryTest {
 
     @Test
     void elserJinaAppliesFiltersToTheInnerRetriever() throws IOException {
-        // The 8.17 client cannot express the reranker's own filter, so they must ride along
-        // on the retriever it wraps.
+        // Filters ride on the retriever the reranker wraps, so candidates are narrowed
+        // before they enter the rerank window rather than discarded after scoring.
         repository.search("batman", SearchMode.ELSER_JINA, 1, 25,
                 new MovieRepository.SearchFilters(List.of("Action"), 1999, "R"), null);
 
