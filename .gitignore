@@ -4,6 +4,7 @@ target/
 # IDE
 /.idea/
 /.claude/
+CLAUDE.md
 *.iml
 *.ipr
 *.iws
