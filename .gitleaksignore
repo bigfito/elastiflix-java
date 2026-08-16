@@ -1,0 +1,14 @@
+# Known historical leaks, acknowledged so the CI secret scan stays useful for NEW findings.
+#
+# Both are Elastic API keys hardcoded in application.yml before credentials were
+# externalized to ${ELASTIC_APIKEY}. They are unreachable from the current tree but
+# permanent in git history — ignoring the fingerprint does NOT un-expose them, so the
+# keys themselves must be (and should already have been) revoked in the Elastic deployment.
+#
+# Fingerprint format: <commit>:<file>:<rule-id>:<line>
+
+# First commit, 2026-04-25
+78152f095557ebf6d82854926388b81262c481b0:src/main/resources/application.yml:generic-api-key:13
+
+# Search interface redesign, 2026-04-28 (replaced the key above with a second live key)
+d0b09fc37dda06971c5ea69d1cf2bb0bdf6b5d38:src/main/resources/application.yml:generic-api-key:13
