@@ -10,9 +10,10 @@
                  th:alt="${movie.title}"
                  class="w-full h-full object-cover"
                  loading="lazy"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
-            <div th:if="${movie.posterPath == null}"
-                 class="w-full h-full flex items-center justify-center text-gray-600 text-2xl">
+                 data-poster/>
+            <!-- See movie-card.html: always present, revealed by elastiflix.js on a load error. -->
+            <div class="poster-fallback w-full h-full flex items-center justify-center text-gray-600 text-2xl"
+                 th:classappend="${movie.posterPath != null} ? 'hidden'">
                 🎬
             </div>
             <div th:if="${movie.voteAverage != null}"
@@ -26,7 +27,7 @@
                     <h3 class="font-semibold text-lg text-white group-hover:text-brand transition"
                         th:text="${movie.title}">Movie Title</h3>
                     <span class="text-gray-400 text-sm whitespace-nowrap"
-                          th:text="${movie.releaseDate != null ? #strings.substring(movie.releaseDate, 0, 4) : ''}"></span>
+                          th:text="${movie.releaseYear}"></span>
                 </div>
                 <div class="flex flex-wrap gap-2 mb-3">
                     <span th:each="genre : ${movie.genres}"
@@ -39,10 +40,10 @@
                 <p class="text-gray-400 text-sm line-clamp-3 leading-relaxed mb-4"
                    th:text="${movie.plot != null ? movie.plot : movie.overview}">Movie plot or overview goes here...</p>
             </div>
-            <div th:if="${movie.cast != null and not #lists.isEmpty(movie.cast)}" class="flex items-center gap-2 overflow-hidden">
+            <div th:if="${not #lists.isEmpty(movie.topCast)}" class="flex items-center gap-2 overflow-hidden">
                 <span class="text-xs text-gray-500 shrink-0">Cast:</span>
                 <span class="text-xs text-gray-400 truncate"
-                      th:text="${#strings.listJoin(movie.cast.subList(0, T(java.lang.Math).min(movie.cast.size(), 5)), ', ')}"></span>
+                      th:text="${#strings.listJoin(movie.topCast, ', ')}"></span>
             </div>
         </div>
     </a>

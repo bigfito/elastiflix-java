@@ -1,2 +1,18 @@
-/.claude/
+# Build output
+target/
+
+# IDE
 /.idea/
+/.claude/
+*.iml
+*.ipr
+*.iws
+
+# Run configurations tend to accumulate real credentials, so the directory is
+# ignored — commit the placeholder template instead of your own configuration.
+/.run/*
+!/.run/*.template.xml
+
+# OS
+.DS_Store
+Thumbs.db

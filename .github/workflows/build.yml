@@ -1,0 +1,58 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Test & verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Ubuntu runners ship Docker, so MovieRepositoryIT runs against a real Elasticsearch
+      # rather than skipping. requireDocker turns a missing daemon into a failure — a silently
+      # skipped integration test is indistinguishable from a passing one in the build log.
+      #
+      # `verify` also enforces the JaCoCo floor (90% instruction / 85% branch), which is bound
+      # to the `test` phase in pom.xml.
+      - name: mvn verify
+        run: ./mvnw --batch-mode --no-transfer-progress verify -Delastiflix.it.requireDocker=true
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 7
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: this repository has had credentials committed to it before, so
+          # scanning only the tip would miss exactly the class of problem we care about.
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

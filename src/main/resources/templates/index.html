@@ -9,6 +9,14 @@
     <h1 class="text-brand font-black text-6xl tracking-tight mb-2">Elastiflix</h1>
     <p class="text-gray-400 text-lg mb-12">Search millions of movies powered by Elasticsearch</p>
 
+    <!-- Set by MovieDetailController when /movies/{id} matched no document. Without this the
+         user is bounced back here with no explanation at all. -->
+    <div th:if="${param.notFound != null}"
+         class="flex items-center gap-3 bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-6 py-4 mb-8 -mt-6">
+        <span class="text-xl shrink-0">🛈</span>
+        <p class="text-sm">That movie is not in the index — it may have been removed since you last saw it.</p>
+    </div>
+
     <!-- Search Form -->
     <form action="/search" method="get" class="w-full max-w-2xl">
         <div class="relative flex items-center mb-4">
@@ -31,7 +39,7 @@
                    class="flex items-center gap-2 cursor-pointer group">
                 <input type="radio" name="mode"
                        th:value="${m.name()}"
-                       th:checked="${m.name() == 'TITLE'}"
+                       th:checked="${m.name() == currentMode}"
                        class="accent-brand"/>
                 <span class="text-sm text-gray-400 group-hover:text-white transition"
                       th:text="${m.label()}"></span>

@@ -1,0 +1,422 @@
+/*
+ * Elastiflix stylesheet — a hand-written subset of the Tailwind utilities this
+ * application actually uses.
+ *
+ * WHY THIS FILE EXISTS
+ * --------------------
+ * The pages used to be styled by <script src="https://cdn.tailwindcss.com">, which is
+ * Tailwind's development-only browser build. That build compiles classes in the browser
+ * on every page load, cannot be pinned with Subresource Integrity, leaves the page
+ * unstyled offline, and — because it is configured from an inline <script> — forced
+ * 'unsafe-inline' into the Content-Security-Policy. Serving the CSS ourselves removes
+ * all four problems and keeps the build pure Maven, with no Node toolchain.
+ *
+ * MAINTENANCE
+ * -----------
+ * This is a closed set: only the ~205 classes the templates use are defined here. A new
+ * Tailwind class in a template will silently do nothing until it is added below. Class
+ * names, the spacing scale and the palette follow Tailwind v3 defaults so the markup
+ * reads the same as it did before; `brand` is the project's own colour.
+ *
+ * Layout: 1. reset  2. design tokens  3. utilities (grouped by property)  4. variants.
+ */
+
+/* ------------------------------------------------------------------ 1. reset       */
+/* The subset of Tailwind Preflight this markup depends on. Without it the browser's
+   default heading sizes and body margin fight every utility below. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    border: 0 solid;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    line-height: 1.5;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji";
+}
+
+body {
+    margin: 0;
+    line-height: inherit;
+}
+
+h1, h2, h3, p, figure {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+img, svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+button, input, select {
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    cursor: pointer;
+    background-color: transparent;
+    background-image: none;
+}
+
+/* ------------------------------------------------------------------ 2. tokens      */
+
+:root {
+    --brand: #e50914;
+    --brand-dark: #b20710;
+
+    --gray-100: #f3f4f6;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --gray-950: #030712;
+
+    --sky-200: #bae6fd;
+    --sky-300: #7dd3fc;
+    --sky-800: #075985;
+    --sky-950: #082f49;
+
+    --yellow-300: #fde047;
+    --yellow-400: #facc15;
+    --yellow-700: #a16207;
+    --yellow-950: #422006;
+
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ------------------------------------------------------------------ 3. utilities   */
+
+/* display ---------------------------------------------------------------------- */
+.block { display: block; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+.hidden { display: none; }
+
+/* position --------------------------------------------------------------------- */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.top-1 { top: 0.25rem; }
+.top-2 { top: 0.5rem; }
+.right-1 { right: 0.25rem; }
+.right-2 { right: 0.5rem; }
+.z-10 { z-index: 10; }
+
+/* flex & grid ------------------------------------------------------------------ */
+.flex-1 { flex: 1 1 0%; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.shrink-0 { flex-shrink: 0; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.gap-1 { gap: 0.25rem; }
+.gap-1\.5 { gap: 0.375rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
+.gap-x-8 { column-gap: 2rem; }
+.gap-y-2 { row-gap: 0.5rem; }
+
+/* sizing ----------------------------------------------------------------------- */
+.w-full { width: 100%; }
+.w-3\.5 { width: 0.875rem; }
+.w-32 { width: 8rem; }
+.w-48 { width: 12rem; }
+.h-full { height: 100%; }
+.h-3\.5 { height: 0.875rem; }
+.h-64 { height: 16rem; }
+.h-fit { height: fit-content; }
+.min-w-0 { min-width: 0; }
+.min-h-screen { min-height: 100vh; }
+.min-h-\[70vh\] { min-height: 70vh; }
+.min-h-\[80vh\] { min-height: 80vh; }
+.max-w-2xl { max-width: 42rem; }
+.max-w-screen-lg { max-width: 1024px; }
+.max-w-screen-xl { max-width: 1280px; }
+.aspect-\[2\/3\] { aspect-ratio: 2 / 3; }
+
+/* spacing ---------------------------------------------------------------------- */
+.mx-auto { margin-left: auto; margin-right: auto; }
+.my-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+.ml-2 { margin-left: 0.5rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+.mt-6 { margin-top: 1.5rem; }
+.-mt-6 { margin-top: -1.5rem; }
+.-mt-32 { margin-top: -8rem; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-1\.5 { margin-bottom: 0.375rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mb-12 { margin-bottom: 3rem; }
+
+.p-1 { padding: 0.25rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+.px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+.pr-28 { padding-right: 7rem; }
+.pr-36 { padding-right: 9rem; }
+.pb-8 { padding-bottom: 2rem; }
+.pb-16 { padding-bottom: 4rem; }
+
+/* typography ------------------------------------------------------------------- */
+.text-\[10px\] { font-size: 10px; line-height: 1.4; }
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+.text-5xl { font-size: 3rem; line-height: 1; }
+.text-6xl { font-size: 3.75rem; line-height: 1; }
+
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
+
+.italic { font-style: italic; }
+.uppercase { text-transform: uppercase; }
+.text-center { text-align: center; }
+.tracking-tight { letter-spacing: -0.025em; }
+.tracking-wider { letter-spacing: 0.05em; }
+.leading-tight { line-height: 1.25; }
+.leading-snug { line-height: 1.375; }
+.leading-relaxed { line-height: 1.625; }
+.whitespace-nowrap { white-space: nowrap; }
+
+.text-white { color: #fff; }
+.text-brand { color: var(--brand); }
+.text-gray-100 { color: var(--gray-100); }
+.text-gray-300 { color: var(--gray-300); }
+.text-gray-400 { color: var(--gray-400); }
+.text-gray-500 { color: var(--gray-500); }
+.text-gray-600 { color: var(--gray-600); }
+.text-sky-200 { color: var(--sky-200); }
+.text-sky-300 { color: var(--sky-300); }
+.text-yellow-300 { color: var(--yellow-300); }
+.text-yellow-400 { color: var(--yellow-400); }
+
+.placeholder-gray-500::placeholder { color: var(--gray-500); }
+
+/* backgrounds ------------------------------------------------------------------ */
+.bg-brand { background-color: var(--brand); }
+.bg-brand\/10 { background-color: rgb(229 9 20 / 0.1); }
+.bg-black\/70 { background-color: rgb(0 0 0 / 0.7); }
+.bg-gray-800 { background-color: var(--gray-800); }
+.bg-gray-800\/50 { background-color: rgb(31 41 55 / 0.5); }
+.bg-gray-900 { background-color: var(--gray-900); }
+.bg-gray-950 { background-color: var(--gray-950); }
+.bg-sky-950 { background-color: var(--sky-950); }
+.bg-yellow-950 { background-color: var(--yellow-950); }
+
+/* gradients. Composed through custom properties the way Tailwind does, so
+   from/via/to can be combined independently of the direction utility. */
+.bg-gradient-to-t {
+    background-image: linear-gradient(
+        to top,
+        var(--tw-gradient-from, transparent),
+        var(--tw-gradient-via, var(--tw-gradient-from, transparent)),
+        var(--tw-gradient-to, transparent)
+    );
+}
+.from-black\/80 { --tw-gradient-from: rgb(0 0 0 / 0.8); }
+.from-gray-950 { --tw-gradient-from: var(--gray-950); }
+.via-gray-950\/60 { --tw-gradient-via: rgb(3 7 18 / 0.6); }
+.via-transparent { --tw-gradient-via: transparent; }
+.to-transparent { --tw-gradient-to: transparent; }
+
+/* borders ---------------------------------------------------------------------- */
+.border { border-width: 1px; }
+.border-t { border-top-width: 1px; }
+.border-b { border-bottom-width: 1px; }
+.border-dashed { border-style: dashed; }
+.border-brand\/20 { border-color: rgb(229 9 20 / 0.2); }
+.border-gray-600 { border-color: var(--gray-600); }
+.border-gray-700 { border-color: var(--gray-700); }
+.border-gray-700\/50 { border-color: rgb(55 65 81 / 0.5); }
+.border-gray-800 { border-color: var(--gray-800); }
+.border-sky-800 { border-color: var(--sky-800); }
+.border-yellow-700 { border-color: var(--yellow-700); }
+
+.rounded { border-radius: 0.25rem; }
+.rounded-md { border-radius: 0.375rem; }
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-xl { border-radius: 0.75rem; }
+.rounded-2xl { border-radius: 1rem; }
+.rounded-full { border-radius: 9999px; }
+
+/* effects ---------------------------------------------------------------------- */
+.shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+.shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.opacity-0 { opacity: 0; }
+.opacity-40 { opacity: 0.4; }
+.object-cover { object-fit: cover; }
+.overflow-hidden { overflow: hidden; }
+.cursor-pointer { cursor: pointer; }
+.accent-brand { accent-color: var(--brand); }
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Multi-line truncation. -webkit-line-clamp is the only cross-browser way to do this
+   and is supported everywhere this app targets. */
+.line-clamp-1,
+.line-clamp-2,
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1; }
+.line-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.line-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+/* transitions ------------------------------------------------------------------ */
+.transition {
+    transition-property: color, background-color, border-color, fill, stroke, opacity,
+        box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: var(--ease);
+    transition-duration: 150ms;
+}
+.transition-all {
+    transition-property: all;
+    transition-timing-function: var(--ease);
+    transition-duration: 150ms;
+}
+.transition-opacity {
+    transition-property: opacity;
+    transition-timing-function: var(--ease);
+    transition-duration: 150ms;
+}
+.duration-200 { transition-duration: 200ms; }
+
+/* behaviour hooks ---------------------------------------------------------------
+   Carry no styling: elastiflix.js locates elements by them. Declared here so the
+   "every class used in a template is defined" guard in TemplateAssetsTest stays
+   meaningful rather than needing an exception list. */
+.poster-fallback { /* see static/js/elastiflix.js — revealed when a poster fails to load */ }
+
+/* ------------------------------------------------------------------ 4. variants    */
+
+/* hover ------------------------------------------------------------------------ */
+.hover\:bg-brand-dark:hover { background-color: var(--brand-dark); }
+.hover\:bg-gray-700:hover { background-color: var(--gray-700); }
+.hover\:text-white:hover { color: #fff; }
+.hover\:text-brand:hover { color: var(--brand); }
+.hover\:text-gray-300:hover { color: var(--gray-300); }
+.hover\:underline:hover { text-decoration-line: underline; }
+.hover\:scale-105:hover { transform: scale(1.05); }
+.hover\:shadow-brand\/30:hover {
+    box-shadow: 0 10px 15px -3px rgb(229 9 20 / 0.3), 0 4px 6px -4px rgb(229 9 20 / 0.3);
+}
+
+/* focus ------------------------------------------------------------------------ */
+.focus\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+.focus\:border-brand:focus { border-color: var(--brand); }
+/* ring-1 + ring-brand together produce Tailwind's 1px offset ring. */
+.focus\:ring-1.focus\:ring-brand:focus { box-shadow: 0 0 0 1px var(--brand); }
+
+/* group -------------------------------------------------------------------------
+   A parent marked `.group` drives these on hover. */
+.group:hover .group-hover\:opacity-100 { opacity: 1; }
+.group:hover .group-hover\:text-white { color: #fff; }
+.group:hover .group-hover\:text-brand { color: var(--brand); }
+
+/* peer --------------------------------------------------------------------------
+   A checked sibling marked `.peer` drives these — this is how the view switcher
+   highlights the selected layout without any JavaScript. */
+.peer:checked ~ .peer-checked\:bg-gray-700 { background-color: var(--gray-700); }
+.peer:checked ~ .peer-checked\:text-white { color: #fff; }
+
+/* responsive --------------------------------------------------------------------
+   Mobile-first, matching Tailwind's default breakpoints. */
+@media (min-width: 640px) {
+    .sm\:block { display: block; }
+    .sm\:flex-row { flex-direction: row; }
+    .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sm\:mx-0 { margin-left: 0; margin-right: 0; }
+    .sm\:h-80 { height: 20rem; }
+    .sm\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+}
+
+@media (min-width: 768px) {
+    .md\:flex-row { flex-direction: row; }
+    .md\:w-64 { width: 16rem; }
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
+    .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Respect a reader's motion preference — the CDN build never did. */
+@media (prefers-reduced-motion: reduce) {
+    .transition,
+    .transition-all,
+    .transition-opacity {
+        transition-duration: 0.01ms;
+    }
+    .hover\:scale-105:hover { transform: none; }
+}

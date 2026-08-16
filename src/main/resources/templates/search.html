@@ -38,7 +38,7 @@
                                         <input type="radio" name="mode"
                                                th:value="${m.name()}"
                                                th:checked="${m.name() == currentMode}"
-                                               onchange="this.form.submit()"
+                                               data-submit-on-change
                                                class="accent-brand"/>
                                         <span class="text-xs text-gray-400 group-hover:text-white transition"
                                               th:text="${m.label()}"></span>
@@ -52,7 +52,7 @@
                         <!-- Sort -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Sort By</label>
-                            <select name="sort" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" onchange="this.form.submit()">
+                            <select name="sort" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" data-submit-on-change>
                                 <option value="">Relevance</option>
                                 <option th:selected="${sort == 'RATING'}" value="RATING">Rating (High to Low)</option>
                                 <option th:selected="${sort == 'YEAR'}" value="YEAR">Year (Newest first)</option>
@@ -62,7 +62,7 @@
                         <!-- Results per Page -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Results per Page</label>
-                            <select name="size" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" onchange="this.form.submit()">
+                            <select name="size" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" data-submit-on-change>
                                 <option th:selected="${pageSize == 25}" value="25">25 results</option>
                                 <option th:selected="${pageSize == 50}" value="50">50 results</option>
                                 <option th:selected="${pageSize == 100}" value="100">100 results</option>
@@ -76,13 +76,13 @@
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Release Year</label>
                             <input type="number" name="year" th:value="${selectedYear}" placeholder="e.g. 2024"
                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition"
-                                   onkeypress="if(event.key === 'Enter'){this.form.submit()}"/>
+                                   data-submit-on-enter/>
                         </div>
 
                         <!-- Rating -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Rating</label>
-                            <select name="rating" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" onchange="this.form.submit()">
+                            <select name="rating" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition" data-submit-on-change>
                                 <option value="">All Ratings</option>
                                 <option th:selected="${selectedRating == 'G'}" value="G">G</option>
                                 <option th:selected="${selectedRating == 'PG'}" value="PG">PG</option>
@@ -93,11 +93,20 @@
                         </div>
 
                         <!-- Genres -->
+                        <!-- A closed-set picker, not free text: the genre filter is an unanalyzed
+                             terms query, so a typo or the wrong casing would silently match nothing. -->
                         <div>
                             <label class="text-[10px] text-gray-500 uppercase tracking-wider block mb-1.5">Genre</label>
-                            <input type="text" name="genres" th:value="${selectedGenres != null and not #lists.isEmpty(selectedGenres) ? selectedGenres[0] : ''}" placeholder="e.g. Action"
-                                   class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition"
-                                   onkeypress="if(event.key === 'Enter'){this.form.submit()}"/>
+                            <select name="genres" multiple size="6"
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand transition">
+                                <option th:each="g : ${allGenres}"
+                                        th:value="${g}"
+                                        th:text="${g}"
+                                        th:selected="${#lists.contains(selectedGenres, g)}"></option>
+                            </select>
+                            <p class="text-[10px] text-gray-600 mt-1">
+                                Ctrl/&#8984;-click for several, then press Search
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -122,14 +131,14 @@
                         <!-- View Switcher -->
                         <div class="flex items-center bg-gray-800 rounded-lg p-1 border border-gray-700">
                             <label class="cursor-pointer">
-                                <input type="radio" name="view" value="grid" th:checked="${view == 'grid'}" class="hidden peer" onchange="this.form.submit()"/>
+                                <input type="radio" name="view" value="grid" th:checked="${view == 'grid'}" class="hidden peer" data-submit-on-change/>
                                 <span class="px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 peer-checked:bg-gray-700 peer-checked:text-white text-gray-500 hover:text-gray-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                                     Grid
                                 </span>
                             </label>
                             <label class="cursor-pointer">
-                                <input type="radio" name="view" value="list" th:checked="${view == 'list'}" class="hidden peer" onchange="this.form.submit()"/>
+                                <input type="radio" name="view" value="list" th:checked="${view == 'list'}" class="hidden peer" data-submit-on-change/>
                                 <span class="px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 peer-checked:bg-gray-700 peer-checked:text-white text-gray-500 hover:text-gray-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                                     List
@@ -138,13 +147,37 @@
                         </div>
                     </div>
 
-                    <!-- Inference endpoint error -->
+                    <!-- Search error. The heading comes from the controller: a cluster outage and a
+                         missing inference endpoint need different fixes, so they must not share a title. -->
                     <div th:if="${searchError != null}"
                          class="flex items-start gap-4 bg-yellow-950 border border-yellow-700 text-yellow-300 rounded-xl px-6 py-5 mb-6">
                         <span class="text-2xl shrink-0">⚠️</span>
                         <div>
-                            <p class="font-semibold mb-1">Inference endpoint not available</p>
+                            <p class="font-semibold mb-1" th:text="${searchErrorTitle ?: 'Search unavailable'}"></p>
                             <p class="text-sm text-yellow-400" th:text="${searchError}"></p>
+                        </div>
+                    </div>
+
+                    <!-- A filter that was dropped before the query ran (e.g. an impossible year) -->
+                    <div th:if="${filterNotice != null}"
+                         class="flex items-start gap-4 bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-6 py-4 mb-6">
+                        <span class="text-xl shrink-0">🛈</span>
+                        <p class="text-sm" th:text="${filterNotice}"></p>
+                    </div>
+
+                    <!-- Degraded search mode (Hybrid cannot sort, so it ran as BM25) -->
+                    <div th:if="${results != null and results.effectiveMode != null and results.effectiveMode != results.mode}"
+                         class="flex items-start gap-4 bg-sky-950 border border-sky-800 text-sky-200 rounded-xl px-6 py-4 mb-6">
+                        <span class="text-xl shrink-0">ℹ️</span>
+                        <div>
+                            <p class="font-semibold mb-1">
+                                Showing <span th:text="${results.effectiveMode}">BM25</span> results,
+                                not <span th:text="${results.mode}">HYBRID</span>
+                            </p>
+                            <p class="text-sm text-sky-300">
+                                Hybrid and reranked modes cannot be combined with an attribute sort.
+                                Set “Sort By” back to <em>Relevance</em> to get their true ranking.
+                            </p>
                         </div>
                     </div>
 
@@ -189,9 +222,9 @@
                                     &laquo;
                                 </a>
 
-                                <!-- Page numbers -->
-                                <th:block th:with="start=${T(java.lang.Math).max(1, results.currentPage - 3)},
-                                                   end=${T(java.lang.Math).min(results.totalPages, results.currentPage + 3)}">
+                                <!-- Page numbers. The window bounds are computed on MovieSearchPage,
+                                     not here, so they stay testable and out of SpEL type references. -->
+                                <th:block th:with="start=${results.pageWindowStart}, end=${results.pageWindowEnd}">
                                     <a th:if="${start > 1}"
                                        th:href="@{/search(q=${query}, mode=${currentMode}, page=1, size=${pageSize}, view=${view}, sort=${sort}, year=${selectedYear}, rating=${selectedRating}, genres=${selectedGenres})}"
                                        class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition">1</a>
@@ -218,6 +251,17 @@
                                     &raquo;
                                 </a>
                             </div>
+
+                            <!-- The retrievable window caps how deep paging can go — the result
+                                 window for most modes, the rerank window for a reranked one — so
+                                 say so rather than offering pages that get clamped on arrival. -->
+                            <p th:if="${results.windowLimited}"
+                               class="text-center text-gray-600 text-xs pb-8">
+                                Only the first
+                                <span th:text="${results.reachableDocuments}">10000</span>
+                                of <span th:text="${results.totalHits}">0</span>
+                                matches can be paged through — refine the query to reach the rest.
+                            </p>
                         </div>
                     </th:block>
                 </div>

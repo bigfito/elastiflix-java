@@ -2,18 +2,68 @@ spring:
   application:
     name: elastiflix-java
   thymeleaf:
-    cache: false
     encoding: UTF-8
 
 server:
   port: 8080
 
 elasticsearch:
-  host: ${ELASTIC_HOST}
-  api-key: ${ELASTIC_APIKEY}
+  host: ${ELASTIC_HOST:}
+  api-key: ${ELASTIC_APIKEY:}
   index: elastiflix-movies
-  ssl-verify: false
+  # Only ever set to false against a local/dev cluster with a self-signed certificate:
+  # startup fails if it is disabled for a non-local HTTPS host.
+  ssl-verify: ${ELASTIC_SSL_VERIFY:true}
+  connect-timeout: 5s
+  socket-timeout: 30s
+  rerank:
+    # Used by the ELSER_JINA mode. This is an Elastic Inference Service endpoint running
+    # jina-reranker-v3.5, created as:
+    #   PUT _inference/rerank/eis-jina-reranker
+    #   { "service": "elastic", "service_settings": { "model_id": "jina-reranker-v3.5" } }
+    # EIS manages the provider key, so none is needed here. Alternatives: the preconfigured
+    # .jina-reranker-v3.5 endpoint, or .rerank-v1-elasticsearch for Elastic's own reranker.
+    inference-id: ${ELASTIC_RERANK_ID:eis-jina-reranker}
+    # Candidates handed to the reranker. Also caps how deep this mode can page, since
+    # documents outside the window are never scored.
+    #
+    # jina-reranker-v3.5 is listwise: the query and every candidate share one 131k-token
+    # context, so the real ceiling is that token budget, not a document count — with movie
+    # plots there is ample room above 50. Raising this costs latency on every search and is
+    # the only way to page deeper. (Note: v3 is documented at 64 documents per call, so keep
+    # this <= 64 if you point ELASTIC_RERANK_ID back at a v3 endpoint.)
+    window-size: ${ELASTIC_RERANK_WINDOW:50}
 
 app:
+  # The one authority for the default page size — MovieSearchParams leaves `size`
+  # unset so that an omitted request parameter resolves to this value.
   page-size: 50
   tmdb-image-base: https://image.tmdb.org/t/p/w500
+  tmdb-image-base-large: https://image.tmdb.org/t/p/w1280
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      # The application has no authentication, so anything shown here is world-readable.
+      # `when-authorized` means an anonymous caller gets UP/DOWN and nothing else; the
+      # dev profile below opens it up for local debugging.
+      show-details: when-authorized
+
+---
+# Dev-only overrides: run with -Dspring.profiles.active=dev to disable template caching
+# and see the full health payload.
+spring:
+  config:
+    activate:
+      on-profile: dev
+  thymeleaf:
+    cache: false
+
+management:
+  endpoint:
+    health:
+      show-details: always

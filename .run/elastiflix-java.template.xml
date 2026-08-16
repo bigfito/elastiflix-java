@@ -1,0 +1,21 @@
+<!--
+  Template run configuration. Copy to `elastiflix-java.run.xml` (git-ignored) and
+  fill in your own cluster details.
+
+  Do NOT commit a copy containing a real API key: `.run/` is ignored precisely
+  because run configurations are an easy place to leak one. Prefer pointing the
+  values at your shell environment over pasting the key here at all.
+-->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="elastiflix-java" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <envs>
+      <env name="ELASTIC_HOST" value="https://your-cluster.es.example.cloud:443" />
+      <env name="ELASTIC_APIKEY" value="REPLACE_WITH_YOUR_BASE64_API_KEY" />
+    </envs>
+    <module name="elastiflix-java" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.elastiflix.ElastiflixApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

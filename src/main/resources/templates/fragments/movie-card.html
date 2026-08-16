@@ -10,9 +10,12 @@
                  th:alt="${movie.title}"
                  class="w-full h-full object-cover"
                  loading="lazy"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
-            <div th:if="${movie.posterPath == null}"
-                 class="w-full h-full flex items-center justify-center text-gray-600 text-4xl">
+                 data-poster/>
+            <!-- Always rendered, hidden while a poster is showing, so elastiflix.js can reveal
+                 it if the image 404s. The old inline handler targeted nextElementSibling, which
+                 in that case was the gradient overlay — the fallback never actually appeared. -->
+            <div class="poster-fallback w-full h-full flex items-center justify-center text-gray-600 text-4xl"
+                 th:classappend="${movie.posterPath != null} ? 'hidden'">
                 🎬
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
@@ -26,7 +29,7 @@
                 th:text="${movie.title}">Movie Title</h3>
             <div class="flex items-center justify-between mt-1">
                 <span class="text-gray-400 text-xs"
-                      th:text="${movie.releaseDate != null ? #strings.substring(movie.releaseDate, 0, 4) : ''}"></span>
+                      th:text="${movie.releaseYear}"></span>
                 <span th:if="${movie.genres != null and not #lists.isEmpty(movie.genres)}"
                       class="text-gray-500 text-xs line-clamp-1"
                       th:text="${movie.genres[0]}"></span>

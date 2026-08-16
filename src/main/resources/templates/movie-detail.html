@@ -57,8 +57,8 @@
 
                 <!-- Meta row -->
                 <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-gray-400">
-                    <span th:if="${movie.releaseDate != null}"
-                          th:text="${#strings.substring(movie.releaseDate, 0, 4)}"></span>
+                    <span th:if="${movie.releaseYear != null}"
+                          th:text="${movie.releaseYear}"></span>
                     <span th:if="${movie.runtime != null and movie.runtime > 0}"
                           th:text="${movie.runtime + ' min'}"></span>
                     <span th:if="${movie.rating != null and not #strings.isEmpty(movie.rating)}"

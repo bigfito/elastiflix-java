@@ -1,0 +1,79 @@
+### Elastiflix — inference endpoint setup
+#
+# Run these requests once per cluster before using the ELSER, E5, HYBRID or
+# ELSER_JINA search modes. TITLE and BM25 need no inference endpoint.
+#
+# Paste the bodies into Kibana -> Dev Tools, or run this file directly from
+# IntelliJ IDEA / VS Code after filling in the two variables below.
+#
+# README.md -> "Required inference endpoints" is the canonical documentation for
+# this setup; keep the two in sync if you change anything here.
+
+@host = https://localhost:9200
+@apiKey = <your-base64-encoded-api-key>
+
+### Sparse embeddings — required for Semantic (ELSER) and Hybrid
+PUT {{host}}/_inference/sparse_embedding/elser
+Authorization: ApiKey {{apiKey}}
+Content-Type: application/json
+
+{
+  "service": "elasticsearch",
+  "service_settings": {
+    "model_id": ".elser-model-2",
+    "num_allocations": 1,
+    "num_threads": 1
+  }
+}
+
+### Dense embeddings — required for Semantic (E5)
+PUT {{host}}/_inference/text_embedding/e5
+Authorization: ApiKey {{apiKey}}
+Content-Type: application/json
+
+{
+  "service": "elasticsearch",
+  "service_settings": {
+    "model_id": ".multilingual-e5-small",
+    "num_allocations": 1,
+    "num_threads": 1
+  }
+}
+
+### Reranking — required for ELSER + Jina rerank (ELSER_JINA)
+#
+# service "elastic" is the Elastic Inference Service: EIS holds the provider
+# credentials, so no Jina API key goes in this request or in the application.
+#
+# The endpoint id below is what `elasticsearch.rerank.inference-id` defaults to.
+# Alternatives, set via ELASTIC_RERANK_ID:
+#   .jina-reranker-v3.5      preconfigured on EIS, nothing to create
+#   .rerank-v1-elasticsearch Elastic's own cross-encoder, runs in-cluster
+PUT {{host}}/_inference/rerank/eis-jina-reranker
+Authorization: ApiKey {{apiKey}}
+Content-Type: application/json
+
+{
+  "service": "elastic",
+  "service_settings": {
+    "model_id": "jina-reranker-v3.5"
+  }
+}
+
+### Verify all three endpoints exist
+GET {{host}}/_inference
+Authorization: ApiKey {{apiKey}}
+
+### Smoke-test the reranker on its own, before involving the search modes
+POST {{host}}/_inference/rerank/eis-jina-reranker
+Authorization: ApiKey {{apiKey}}
+Content-Type: application/json
+
+{
+  "query": "a caped vigilante fights crime at night",
+  "input": [
+    "A young Bruce Wayne becomes the protector of Gotham.",
+    "A man with a low IQ recounts his extraordinary life.",
+    "Two boys grow up in a violent Rio neighbourhood."
+  ]
+}
