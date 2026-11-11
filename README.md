@@ -5,7 +5,13 @@ A movie search web application built with **Spring Boot** and **Elasticsearch**,
 ![Java](https://img.shields.io/badge/Java-25-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-green)
 ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-9.5-yellow)
-![License](https://img.shields.io/badge/license-Apache%202.0-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+> **Elastiflix family**
+> - **[elastiflix-reloaded](https://github.com/bigfito/elastiflix-reloaded)**: the current version of this demo (Java 25, Spring Boot 4.1, Elasticsearch Serverless; full-text, k-NN and hybrid RRF search, with built-in data loading).
+> - [elastiflix-java](https://github.com/bigfito/elastiflix-java): previous version, which compares six search modes (ELSER, E5, reranking).
+> - [elastiflix-loader-java](https://github.com/bigfito/elastiflix-loader-java): bulk loader for the `elastiflix-movies` index that `elastiflix-java` uses.
+> - Inspired by Elastic's original demo [elastic/Elastiflix](https://github.com/elastic/Elastiflix) (forked at [bigfito/elastiflix](https://github.com/bigfito/elastiflix)).
 
 ---
 
@@ -410,4 +416,4 @@ To build a Gen AI agent on top of this project, use the following to define its 
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
